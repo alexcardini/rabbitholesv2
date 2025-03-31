@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL;
+const API_BASE_URL = "/api"; // Force correct routing to backend
 
 const api = axios.create({
     baseURL: API_BASE_URL,
@@ -19,4 +19,4 @@ export const searchRabbitHole = async (params: {
     return response.data;
 };
 
-export default api; 
+export default api;
