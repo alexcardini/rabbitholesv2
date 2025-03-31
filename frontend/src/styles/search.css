@@ -132,3 +132,22 @@
 .particles-active .card-content {
   filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.1));
 } 
+
+.tagline-glow {
+  background: linear-gradient(90deg, #888, #fff, #888);
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 2.5s linear infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 100% 0;
+  }
+}
