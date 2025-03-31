@@ -249,7 +249,9 @@ const SearchView: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [conversationHistory, setConversationHistory] = useState<ConversationMessage[]>([]);
   const [currentConcept, setCurrentConcept] = useState<string>('');
+  const [isBootingFromURL, setIsBootingFromURL] = useState(false);
   const [autoSearchTriggered, setAutoSearchTriggered] = useState(false);
+  
   const activeRequestRef = useRef<{ [key: string]: AbortController | null }>({});
 
   const thothDeckRef = useRef<HTMLDivElement>(null);
@@ -288,9 +290,10 @@ const SearchView: React.FC = () => {
   const q = params.get("q");
   const concept = params.get("concept");
 
-  if (q) {
+   if (q) {
     setQuery(q);
     if (concept) setCurrentConcept(concept);
+    setIsBootingFromURL(true); // 🧠 show overlay
     setAutoSearchTriggered(true);
   }
 }, []);
@@ -584,13 +587,25 @@ const SearchView: React.FC = () => {
     } catch (error) {
       console.error('Search failed:', error);
     } finally {
+      setIsBootingFromURL(false);
       setIsLoading(false);
     }
   };
 
   if (!searchResult) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#0A0A0A]">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#0A0A0A] relative">
+      
+      {isBootingFromURL && (
+        <div className="absolute inset-0 bg-[#0A0A0A] text-white z-50 flex flex-col items-center justify-center text-center px-8">
+          <div className="text-2xl md:text-3xl font-semibold">
+            🧠 AI is searching the web and connecting you with your knowledge...
+          </div>
+          <div className="mt-4 text-sm text-gray-300">
+            You will visualize it very soon.
+          </div>
+        </div>
+      )}
         <a
           href="https://www.konfront.mx"
           target="_blank"
