@@ -1,0 +1,30 @@
+{
+  "name": "rabbithole-app",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "backend:dev": "cd backend && npm run dev",
+    "backend:build": "cd backend && npm run build",
+    "backend:start": "cd backend && npm start",
+    "frontend:dev": "cd frontend && npm run dev",
+    "frontend:build": "cd frontend && npm run build",
+    "frontend:start": "cd frontend && npm start",
+    "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\"",
+    "build": "npm run frontend:build && npm run backend:build && npm run copy-frontend",
+    "start": "cd backend && npm start",
+    "copy-frontend": "cp -r frontend/build backend/dist/frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0"
+  },
+  "dependencies": {
+    "@types/dagre": "^0.7.52",
+    "@types/gsap": "^1.20.2",
+    "dagre": "^0.8.5",
+    "gsap": "^3.12.7"
+  }
+}
