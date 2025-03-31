@@ -198,7 +198,114 @@ const useDeckHoverAnimation = (deckRef: React.RefObject<HTMLDivElement>) => {
     deck.addEventListener('mouseenter', onHover);
     deck.addEventListener('mouseleave', onHoverOut);
 
-    return () => {
+    
+  const handleSearch = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const finalQuery = query.trim();
+    const finalConcept = currentConcept.trim();
+    if (!finalQuery) return;
+
+    try {
+      setIsLoading(true);
+      const response = await searchRabbitHole({
+        query: finalQuery,
+        concept: finalConcept,
+        followUpMode,
+      });
+      setSearchResult(response);
+
+      const mainNode: Node = {
+        id: 'main',
+        type: 'mainNode',
+        data: {
+          label: response.contextualQuery || finalQuery,
+          content: response.response,
+          images: response.images?.map((img: ImageData) => img.url),
+          sources: response.sources,
+          isExpanded: true
+        },
+        position: { x: 0, y: 0 },
+        style: {
+          width: nodeWidth,
+          height: nodeHeight,
+          background: '#1a1a1a',
+          color: '#fff',
+          border: '1px solid #333',
+          borderRadius: '8px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+          cursor: 'default'
+        }
+      };
+
+      const followUpNodes: Node[] = response.followUpQuestions.map((question: string, index: number) => ({
+        id: `question-${index}`,
+        type: 'default',
+        data: {
+          label: question,
+          isExpanded: false,
+          content: '',
+          images: [],
+          sources: []
+        },
+        position: { x: 0, y: 0 },
+        style: {
+          width: questionNodeWidth,
+          background: '#1a1a1a',
+          color: '#fff',
+          border: '1px solid #333',
+          borderRadius: '8px',
+          fontSize: '14px',
+          textAlign: 'left',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+          cursor: 'pointer'
+        }
+      }));
+
+      const edges: Edge[] = followUpNodes.map((_, index) => ({
+        id: `edge-${index}`,
+        source: 'main',
+        target: `question-${index}`,
+        style: {
+          stroke: 'rgba(248, 248, 248, 0.8)',
+          strokeWidth: 1.5
+        },
+        type: 'smoothstep',
+        animated: true,
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+          color: 'rgba(248, 248, 248, 0.8)'
+        }
+      }));
+
+      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+        [mainNode, ...followUpNodes],
+        edges
+      );
+
+      setNodes(layoutedNodes);
+      setEdges(layoutedEdges);
+    } catch (err) {
+      console.error("Search failed:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("q");
+    const mode = (params.get("mode") || "expansive") as "focused" | "expansive";
+    const concept = params.get("concept");
+
+    if (q) {
+      setQuery(q);
+      setCurrentConcept(concept || '');
+      setFollowUpMode(mode);
+      handleSearch();
+    }
+  }, []);
+
+return () => {
       if (floatingAnimation) {
         floatingAnimation.kill();
       }
@@ -272,111 +379,6 @@ const SearchView: React.FC = () => {
   useDeckHoverAnimation(anubisDeckRef);
   useDeckHoverAnimation(isisDeckRef);
 
-useEffect(() => {
-  const params = new URLSearchParams(window.location.search);
-  const q = params.get("q");
-  const mode = params.get("mode") || "expansive";
-  const concept = params.get("concept");
-
-  if (q) {
-    setQuery(q); // visually update the input box
-    setCurrentConcept(concept || '');
-    // 🔥 Trigger full search pipeline
-    handleSearch(); // ✅ call with no arguments
-    
-    setIsLoading(true);
-
-    const fetchFromURL = async () => {
-      try {
-        const response = await searchRabbitHole({
-          query: q,
-          concept: concept || '',
-          followUpMode: mode as "focused" | "expansive"
-        });
-
-        setSearchResult(response);
-
-        const mainNode: Node = {
-          id: 'main',
-          type: 'mainNode',
-          data: {
-            label: response.contextualQuery || q,
-            content: response.response,
-            images: response.images?.map((img: ImageData) => img.url),
-            sources: response.sources,
-            isExpanded: true
-          },
-          position: { x: 0, y: 0 },
-          style: {
-            width: nodeWidth,
-            height: nodeHeight,
-            background: '#1a1a1a',
-            color: '#fff',
-            border: '1px solid #333',
-            borderRadius: '8px',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-            cursor: 'default'
-          }
-        };
-
-        const followUpNodes: Node[] = response.followUpQuestions.map((question: string, index: number) => ({
-          id: `question-${index}`,
-          type: 'default',
-          data: {
-            label: question,
-            isExpanded: false,
-            content: '',
-            images: [],
-            sources: []
-          },
-          position: { x: 0, y: 0 },
-          style: {
-            width: questionNodeWidth,
-            background: '#1a1a1a',
-            color: '#fff',
-            border: '1px solid #333',
-            borderRadius: '8px',
-            fontSize: '14px',
-            textAlign: 'left',
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-            cursor: 'pointer'
-          }
-        }));
-
-        const edges: Edge[] = followUpNodes.map((_, index) => ({
-          id: `edge-${index}`,
-          source: 'main',
-          target: `question-${index}`,
-          style: {
-            stroke: 'rgba(248, 248, 248, 0.8)',
-            strokeWidth: 1.5
-          },
-          type: 'smoothstep',
-          animated: true,
-          markerEnd: {
-            type: MarkerType.ArrowClosed,
-            color: 'rgba(248, 248, 248, 0.8)'
-          }
-        }));
-
-        const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-          [mainNode, ...followUpNodes],
-          edges
-        );
-
-        setNodes(layoutedNodes);
-        setEdges(layoutedEdges);
-      } catch (error) {
-        console.error("Search via URL failed:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchFromURL();
-  }
-}, []);
-  
   useEffect(() => {
     return () => {
       Object.values(activeRequestRef.current).forEach(controller => {
@@ -551,34 +553,7 @@ useEffect(() => {
     }
   };
 
-  const handleSearch = async () => {
-    if (!query.trim()) return;
-
-    try {
-      setIsLoading(true);
-      const loadingNode: Node = {
-        id: 'main',
-        type: 'mainNode',
-        data: { 
-          label: query,
-          content: 'Loading...',
-          images: [],
-          sources: [],
-          isExpanded: true 
-        },
-        position: { x: 0, y: 0 },
-        style: {
-          width: nodeWidth,
-          height: nodeHeight,
-          minHeight: nodeHeight,
-          background: '#1a1a1a',
-          color: '#fff',
-          border: '1px solid #333',
-          borderRadius: '8px',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-          cursor: 'default' 
-        }
-      };
+  
 
       setNodes([loadingNode]);
       setEdges([]);
