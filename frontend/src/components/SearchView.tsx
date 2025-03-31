@@ -281,6 +281,11 @@ useEffect(() => {
   if (q) {
     setQuery(q); // visually update the input box
     setCurrentConcept(concept || '');
+    // 🔥 Trigger full search pipeline
+    handleSearch({
+      preventDefault: () => {} // mock event to satisfy the handler
+    });
+    
     setIsLoading(true);
 
     const fetchFromURL = async () => {
