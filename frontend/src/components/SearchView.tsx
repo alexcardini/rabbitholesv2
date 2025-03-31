@@ -249,6 +249,7 @@ const SearchView: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [conversationHistory, setConversationHistory] = useState<ConversationMessage[]>([]);
   const [currentConcept, setCurrentConcept] = useState<string>('');
+  const [autoSearchTriggered, setAutoSearchTriggered] = useState(false);
   const activeRequestRef = useRef<{ [key: string]: AbortController | null }>({});
 
   const thothDeckRef = useRef<HTMLDivElement>(null);
@@ -281,6 +282,25 @@ const SearchView: React.FC = () => {
       });
     };
   }, []);
+
+  useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const q = params.get("q");
+  const concept = params.get("concept");
+
+  if (q) {
+    setQuery(q);
+    if (concept) setCurrentConcept(concept);
+    setAutoSearchTriggered(true);
+  }
+}, []);
+
+  useEffect(() => {
+  if (autoSearchTriggered && query.trim()) {
+    handleSearch();
+    setAutoSearchTriggered(false);
+  }
+}, [autoSearchTriggered, query]);
 
   useEffect(() => {
   const params = new URLSearchParams(window.location.search);
