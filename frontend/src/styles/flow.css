@@ -1,0 +1,104 @@
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}
+
+.prose-invert h4 {
+  color: #fff;
+  font-size: 1.1em;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.prose-invert p {
+  margin-top: 0.5em;
+  margin-bottom: 1em;
+  line-height: 1.6;
+}
+
+.prose-invert :where(h4):not(:where([class~="not-prose"] *)) {
+  color: #fff;
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.prose-invert {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+.prose-invert * {
+  pointer-events: auto;
+}
+
+.overflow-y-auto {
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Dark theme for ReactFlow controls */
+.react-flow__controls button {
+  background-color: #111111 !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid #333333 !important;
+  border-radius: 4px !important;
+  transition: all 0.2s ease;
+}
+
+.react-flow__controls button:hover {
+  background-color: #222222 !important;
+  color: rgba(255, 255, 255, 1) !important;
+}
+
+.react-flow__controls button svg {
+  fill: rgba(255, 255, 255, 0.8) !important;
+  transform: scale(0.9);
+}
+
+.react-flow__controls button:hover svg {
+  fill: rgba(255, 255, 255, 1) !important;
+}
+
+.react-flow__controls {
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Dark theme for edges */
+.react-flow__edge-path {
+  stroke: rgba(255, 255, 255, 0.3) !important;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Dark theme for minimap */
+.react-flow__minimap {
+  background-color: #111111 !important;
+  border: 1px solid #333333 !important;
+  border-radius: 4px !important;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+.react-flow__minimap-mask {
+  fill: rgba(0, 0, 0, 0.7) !important;
+}
+
+.react-flow__minimap-node {
+  fill: #666666 !important;
+  stroke: none !important;
+} 
