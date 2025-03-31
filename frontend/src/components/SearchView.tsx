@@ -284,8 +284,8 @@ const useDeckHoverAnimation = (deckRef: React.RefObject<HTMLDivElement>) => {
 
       setNodes(layoutedNodes);
       setEdges(layoutedEdges);
-    } catch (err) {
-      console.error("Search failed:", err);
+    } catch (error) {
+      console.error("Search failed:", error);
     } finally {
       setIsLoading(false);
     }
@@ -553,7 +553,34 @@ const SearchView: React.FC = () => {
     }
   };
 
-  
+  const handleSearch = async () => {
+    if (!query.trim()) return;
+
+    try {
+      setIsLoading(true);
+      const loadingNode: Node = {
+        id: 'main',
+        type: 'mainNode',
+        data: { 
+          label: query,
+          content: 'Loading...',
+          images: [],
+          sources: [],
+          isExpanded: true 
+        },
+        position: { x: 0, y: 0 },
+        style: {
+          width: nodeWidth,
+          height: nodeHeight,
+          minHeight: nodeHeight,
+          background: '#1a1a1a',
+          color: '#fff',
+          border: '1px solid #333',
+          borderRadius: '8px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+          cursor: 'default' 
+        }
+      };
 
       setNodes([loadingNode]);
       setEdges([]);
