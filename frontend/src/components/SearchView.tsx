@@ -251,6 +251,18 @@ const SearchView: React.FC = () => {
   const [currentConcept, setCurrentConcept] = useState<string>('');
   const [isBootingFromURL, setIsBootingFromURL] = useState(false);
   const [autoSearchTriggered, setAutoSearchTriggered] = useState(false);
+  const taglines = [
+  "🧠 The rabbit is searching the web and digging your knowledge hole",
+  "🔍 Assembling the puzzle pieces of truth",
+  "🌐 Consulting the oracles of the internet",
+  "🦾 Letting the AI do the thinking for now",
+  "📚 Pulling insights from the deepest corners of the web",
+  "⏳ Gathering signals from every possible source",
+  "🤖 Your knowledge is brewing. Hang tight",
+  "📡 Calibrating the brainwaves",
+];
+
+const [currentTaglineIndex, setCurrentTaglineIndex] = useState(0);
   
   const activeRequestRef = useRef<{ [key: string]: AbortController | null }>({});
 
@@ -320,6 +332,16 @@ const SearchView: React.FC = () => {
     }, 100); // slight delay to avoid race conditions
   }
 }, []);
+
+   useEffect(() => {
+  if (!isBootingFromURL) return;
+
+  const interval = setInterval(() => {
+    setCurrentTaglineIndex((prev) => (prev + 1) % taglines.length);
+  }, 4500); // rotate every 4.5 seconds
+
+  return () => clearInterval(interval);
+}, [isBootingFromURL]);
 
 
   const handleNodeClick = async (node: Node) => {
@@ -598,8 +620,8 @@ const SearchView: React.FC = () => {
       
       {isBootingFromURL && (
         <div className="absolute inset-0 bg-[#0A0A0A] text-white z-50 flex flex-col items-center justify-center text-center px-8">
-          <div className="text-2xl md:text-3xl font-semibold">
-            🧠 AI is searching the web and connecting you with your knowledge...
+          <div className="text-2xl md:text-3xl font-semibold transition-opacity duration-500 ease-in-out">
+          {taglines[currentTaglineIndex]}
           </div>
           <div className="mt-4 text-sm text-gray-300">
             You will visualize it very soon.
