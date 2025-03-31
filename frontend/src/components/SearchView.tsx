@@ -620,7 +620,7 @@ const [currentTaglineIndex, setCurrentTaglineIndex] = useState(0);
       
       {isBootingFromURL && (
         <div className="absolute inset-0 bg-[#0A0A0A] text-white z-50 flex flex-col items-center justify-center text-center px-8">
-          <div className="text-2xl md:text-3xl font-semibold transition-opacity duration-500 ease-in-out">
+          <div className="text-2xl md:text-3xl font-semibold transition-opacity duration-500 ease-in-out tagline-glow">
           {taglines[currentTaglineIndex]}
           </div>
           <div className="mt-4 text-sm text-gray-300">
