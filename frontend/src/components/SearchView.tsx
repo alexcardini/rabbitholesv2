@@ -282,9 +282,7 @@ useEffect(() => {
     setQuery(q); // visually update the input box
     setCurrentConcept(concept || '');
     // 🔥 Trigger full search pipeline
-    handleSearch({
-      preventDefault: () => {} // mock event to satisfy the handler
-    });
+    handleSearch(); // ✅ call with no arguments
     
     setIsLoading(true);
 
