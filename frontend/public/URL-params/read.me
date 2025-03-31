@@ -1,0 +1,103 @@
+# 🧠 RabbitHoles: Power Searching with URL-Based Triggers
+
+Welcome to the RabbitHoles platform — a creative, AI-powered engine that helps you explore any topic like never before. This guide explains how to trigger AI searches directly via URL parameters, enabling seamless integrations, deeper learning journeys, and collaborative curiosity. Whether you're embedding this in tools, generating links from emails, or crafting your own digital rabbit holes — this doc has you covered.
+
+---
+
+## 🔗 URL Structure
+
+```
+https://yourapp.com/?q=YOUR_QUERY&concept=YOUR_CONCEPT
+```
+
+This allows you to:
+- Launch a search automatically
+- Pre-fill the interface with meaningful context
+- Customize the learning experience for your users
+
+---
+
+## ✅ Parameters
+
+| Parameter  | Required | Description |
+|------------|----------|-------------|
+| `q`        | ✅ Yes    | The main search query — what the AI will explore deeply. |
+| `concept`  | ❌ No     | An optional anchor that guides how the AI interprets or frames the query. Think of it as a thematic lens or perspective. |
+| `mode`     | ❌ No     | Can be `focused` or `expansive`. `focused` zooms in, `expansive` explores broadly. Default is `expansive`. |
+
+---
+
+## 🧠 What is `concept`?
+
+The `concept` parameter is like handing the AI a lens and saying, "Look at this topic from **this** angle."
+
+### 🔍 Example:
+```
+?q=Bitcoin&concept=El+Salvador
+```
+- **Query**: Bitcoin
+- **Concept**: El Salvador
+
+> This tells the AI: "Explain Bitcoin with a focus on how it's used or understood in El Salvador."
+
+Other examples:
+- `?q=Climate+Change&concept=Africa`
+- `?q=Generative+AI&concept=Education`
+- `?q=Universal+Basic+Income&concept=Science+Fiction`
+
+This is extremely useful for educators, content creators, and thinkers who want **tailored context** for a given audience or theme.
+
+---
+
+## 🧩 Examples
+
+### 🔍 Basic Search:
+```
+https://rabbitholesv2-production.up.railway.app/?q=What+is+AI
+```
+
+> Returns an exploratory response to "What is AI"
+
+### 🧠 Thematic Search:
+```
+https://rabbitholesv2-production.up.railway.app/?q=Electric+Vehicles&concept=Battery+Innovation
+```
+
+> Focuses on electric vehicles through the lens of battery technology and innovation.
+
+### 🧪 Mode-controlled Search:
+```
+https://rabbitholesv2-production.up.railway.app/?q=Space+Exploration&mode=focused
+```
+
+> Delivers a more narrow, concise breakdown of space exploration.
+
+---
+
+## ⚙️ How It Works
+
+1. When the page loads, the RabbitHoles front-end checks the URL for parameters.
+2. If `q` (query) exists:
+   - It pre-fills the input field
+   - Displays a full-screen animated overlay while the AI searches
+   - Automatically triggers `handleSearch()`
+3. The app sends a structured request like:
+   ```json
+   {
+     "query": "Electric Vehicles",
+     "concept": "Battery Innovation",
+     "followUpMode": "expansive"
+   }
+   ```
+
+## 💡 Use Cases
+
+RabbitHoles URLs unlock creative, contextualized knowledge for many applications:
+
+- **Educational Portals** – Preloaded search journeys for students (e.g., "What is photosynthesis?" through the lens of agriculture in Mexico)
+- **Newsletter CTA** – Embed a link like: “Explore AI’s role in creativity” → links to `?q=AI&concept=Creativity`
+- **Internal Tools** – Trigger RabbitHoles queries directly from dashboards or team wikis
+- **Workshops & Presentations** – Create live links that generate interactive visuals during talks
+
+---
+
