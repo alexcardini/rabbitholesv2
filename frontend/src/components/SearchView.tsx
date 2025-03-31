@@ -316,7 +316,7 @@ useEffect(() => {
           }
         };
 
-        const followUpNodes: Node[] = response.followUpQuestions.map((question, index) => ({
+        const followUpNodes: Node[] = response.followUpQuestions.map((question: string, index: number) => ({
           id: `question-${index}`,
           type: 'default',
           data: {
