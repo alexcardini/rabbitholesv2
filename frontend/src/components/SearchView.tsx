@@ -91,7 +91,213 @@ const nodeTypes = {
 };
 
 const useDeckHoverAnimation = (deckRef: React.RefObject<HTMLDivElement>) => {
-  
+  useEffect(() => {
+    if (!deckRef.current) return;
+
+    const deck = deckRef.current;
+    const symbol = deck.querySelector('svg');
+    const card = deck.querySelector('.card-content');
+    let floatingAnimation: gsap.core.Timeline;
+
+    gsap.set(symbol, { scale: 1 });
+    gsap.set(card, { 
+      y: 0, 
+      rotate: 0,
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+    });
+
+    const createFloatingAnimation = () => {
+      const timeline = gsap.timeline({
+        repeat: -1,
+        yoyo: true,
+        defaults: { duration: 2, ease: "power1.inOut" }
+      });
+
+      const randomRotation = (Math.random() - 0.5) * 10;
+      
+      timeline
+        .to(card, {
+          y: -15,
+          x: 5,
+          rotate: randomRotation,
+          boxShadow: '0 20px 30px -10px rgba(0, 0, 0, 0.3)',
+          duration: 2
+        })
+        .to(card, {
+          y: -10,
+          x: -5,
+          rotate: -randomRotation,
+          boxShadow: '0 15px 25px -8px rgba(0, 0, 0, 0.25)',
+          duration: 2
+        })
+        .to(card, {
+          y: -20,
+          x: 0,
+          rotate: 0,
+          boxShadow: '0 25px 35px -12px rgba(0, 0, 0, 0.35)',
+          duration: 2
+        });
+
+      timeline
+        .to(symbol, {
+          scale: 1.1,
+          rotate: 5,
+          duration: 3,
+          ease: "none"
+        }, 0)
+        .to(symbol, {
+          scale: 1.15,
+          rotate: -5,
+          duration: 3,
+          ease: "none"
+        }, 3);
+
+      return timeline;
+    };
+
+    const onHover = () => {
+      if (floatingAnimation) {
+        floatingAnimation.kill();
+      }
+
+      floatingAnimation = createFloatingAnimation();
+      
+      gsap.to(card, {
+        boxShadow: '0 20px 30px -10px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.1)',
+        duration: 0.5
+      });
+
+      deck.classList.add('particles-active');
+    };
+
+    const onHoverOut = () => {
+      if (floatingAnimation) {
+        floatingAnimation.kill();
+      }
+
+      gsap.to(symbol, {
+        scale: 1,
+        rotate: 0,
+        duration: 0.5,
+        ease: 'power2.out'
+      });
+
+      gsap.to(card, {
+        y: 0,
+        x: 0,
+        rotate: 0,
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+        duration: 0.5,
+        ease: 'power2.out',
+        clearProps: 'all' // Clear all applied properties
+      });
+
+      deck.classList.remove('particles-active');
+    };
+
+    deck.addEventListener('mouseenter', onHover);
+    deck.addEventListener('mouseleave', onHoverOut);
+
+    return () => {
+      if (floatingAnimation) {
+        floatingAnimation.kill();
+      }
+      deck.removeEventListener('mouseenter', onHover);
+      deck.removeEventListener('mouseleave', onHoverOut);
+    };
+  }, [deckRef]);
+};
+
+const DECK_QUESTIONS = {
+  thoth: [
+    "How can leaders balance creativity with execution?",
+    "What are the key mindsets that drive innovation?",
+    "How does curiosity shape leadership?",
+    "What’s the biggest barrier to personal and professional growth?",
+    "How can leaders foster a culture of continuous learning?",
+    "What’s the most underrated skill for effective leadership in tech?"
+  ],
+  anubis: [
+    "What’s the next big technological breakthrough no one sees coming?",
+    "How will AI reshape human creativity?",
+    "What industries are most vulnerable to disruption in the next decade?",
+    "How do we balance innovation with ethical responsibility?",
+    "What’s the most exciting use of blockchain beyond finance?",
+    "How will quantum computing change everything we know?"
+  ],
+  isis: [
+    "What’s the biggest unsolved problem in software development?",
+    "Why do most startups fail despite having great tech?",
+    "What’s the hardest challenge in scaling a technology company?",
+    "How can developers avoid over-engineering solutions?",
+    "What’s the real bottleneck in AI adoption today?",
+    "How do we design technology that truly empowers people?"
+  ]
+} as const;
+
+const getRandomQuestion = (category: keyof typeof DECK_QUESTIONS) => {
+  const questions = DECK_QUESTIONS[category];
+  const randomIndex = Math.floor(Math.random() * questions.length);
+  return questions[randomIndex];
+};
+
+const SearchView: React.FC = () => {
+  const [query, setQuery] = useState('');
+  const [searchResult, setSearchResult] = useState<SearchResponse | null>(null);
+  const [nodes, setNodes] = useState<Node[]>([]);
+  const [edges, setEdges] = useState<Edge[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [conversationHistory, setConversationHistory] = useState<ConversationMessage[]>([]);
+  const [currentConcept, setCurrentConcept] = useState<string>('');
+  const activeRequestRef = useRef<{ [key: string]: AbortController | null }>({});
+
+  const thothDeckRef = useRef<HTMLDivElement>(null);
+  const anubisDeckRef = useRef<HTMLDivElement>(null);
+  const isisDeckRef = useRef<HTMLDivElement>(null);
+
+  const [deckQuestions, setDeckQuestions] = useState({
+    thoth: getRandomQuestion('thoth'),
+    anubis: getRandomQuestion('anubis'),
+    isis: getRandomQuestion('isis')
+  });
+
+  const refreshDeckQuestion = (category: keyof typeof DECK_QUESTIONS) => {
+    setDeckQuestions(prev => ({
+      ...prev,
+      [category]: getRandomQuestion(category)
+    }));
+  };
+
+  useDeckHoverAnimation(thothDeckRef);
+  useDeckHoverAnimation(anubisDeckRef);
+  useDeckHoverAnimation(isisDeckRef);
+
+  useEffect(() => {
+    return () => {
+      Object.values(activeRequestRef.current).forEach(controller => {
+        if (controller) {
+          controller.abort();
+        }
+      });
+    };
+  }, []);
+
+  useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const q = params.get("q");
+  const concept = params.get("concept");
+
+  if (q) {
+    setQuery(q);
+    if (concept) setCurrentConcept(concept);
+
+    // Delay search until query state is set
+    setTimeout(() => {
+      handleSearch();
+    }, 100); // slight delay to avoid race conditions
+  }
+}, []);
+
 
   const handleNodeClick = async (node: Node) => {
     if (!node.id.startsWith('question-') || node.data.isExpanded) return;
@@ -257,7 +463,34 @@ const useDeckHoverAnimation = (deckRef: React.RefObject<HTMLDivElement>) => {
     }
   };
 
-  
+  const handleSearch = async () => {
+    if (!query.trim()) return;
+
+    try {
+      setIsLoading(true);
+      const loadingNode: Node = {
+        id: 'main',
+        type: 'mainNode',
+        data: { 
+          label: query,
+          content: 'Loading...',
+          images: [],
+          sources: [],
+          isExpanded: true 
+        },
+        position: { x: 0, y: 0 },
+        style: {
+          width: nodeWidth,
+          height: nodeHeight,
+          minHeight: nodeHeight,
+          background: '#1a1a1a',
+          color: '#fff',
+          border: '1px solid #333',
+          borderRadius: '8px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+          cursor: 'default' 
+        }
+      };
 
       setNodes([loadingNode]);
       setEdges([]);
@@ -336,115 +569,7 @@ const useDeckHoverAnimation = (deckRef: React.RefObject<HTMLDivElement>) => {
   };
 
   if (!searchResult) {
-    
-  const handleSearch = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    const finalQuery = query.trim();
-    const finalConcept = currentConcept.trim();
-    if (!finalQuery) return;
-
-    try {
-      setIsLoading(true);
-      const response = await searchRabbitHole({
-        query: finalQuery,
-        concept: finalConcept,
-        followUpMode,
-      });
-      setSearchResult(response);
-
-      const mainNode: Node = {
-        id: 'main',
-        type: 'mainNode',
-        data: {
-          label: response.contextualQuery || finalQuery,
-          content: response.response,
-          images: response.images?.map((img: ImageData) => img.url),
-          sources: response.sources,
-          isExpanded: true
-        },
-        position: { x: 0, y: 0 },
-        style: {
-          width: nodeWidth,
-          height: nodeHeight,
-          background: '#1a1a1a',
-          color: '#fff',
-          border: '1px solid #333',
-          borderRadius: '8px',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-          cursor: 'default'
-        }
-      };
-
-      const followUpNodes: Node[] = response.followUpQuestions.map((question: string, index: number) => ({
-        id: `question-${index}`,
-        type: 'default',
-        data: {
-          label: question,
-          isExpanded: false,
-          content: '',
-          images: [],
-          sources: []
-        },
-        position: { x: 0, y: 0 },
-        style: {
-          width: questionNodeWidth,
-          background: '#1a1a1a',
-          color: '#fff',
-          border: '1px solid #333',
-          borderRadius: '8px',
-          fontSize: '14px',
-          textAlign: 'left',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-          cursor: 'pointer'
-        }
-      }));
-
-      const edges: Edge[] = followUpNodes.map((_, index) => ({
-        id: `edge-${index}`,
-        source: 'main',
-        target: `question-${index}`,
-        style: {
-          stroke: 'rgba(248, 248, 248, 0.8)',
-          strokeWidth: 1.5
-        },
-        type: 'smoothstep',
-        animated: true,
-        markerEnd: {
-          type: MarkerType.ArrowClosed,
-          color: 'rgba(248, 248, 248, 0.8)'
-        }
-      }));
-
-      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-        [mainNode, ...followUpNodes],
-        edges
-      );
-
-      setNodes(layoutedNodes);
-      setEdges(layoutedEdges);
-    } catch (error) {
-      console.error("Search failed:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const q = params.get("q");
-    const mode = (params.get("mode") || "expansive") as "focused" | "expansive";
-    const concept = params.get("concept");
-
-    if (q) {
-      setQuery(q);
-      setCurrentConcept(concept || '');
-      setFollowUpMode(mode);
-      handleSearch();
-    }
-  }, []);
-
-return (
+    return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#0A0A0A]">
         <a
           href="https://www.konfront.mx"
