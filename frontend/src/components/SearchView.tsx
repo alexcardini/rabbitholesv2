@@ -463,12 +463,7 @@ const SearchView: React.FC = () => {
     }
   };
 
- const handleSearch = async (
-  overrideQuery?: string,
-  overrideConcept?: string
-) => {
-  const finalQuery = overrideQuery || query;
-  const finalConcept = overrideConcept || currentConcept;
+  const handleSearch = async () => {
     if (!query.trim()) return;
 
     try {
@@ -501,7 +496,7 @@ const SearchView: React.FC = () => {
       setEdges([]);
 
       const response = await searchRabbitHole({
-        query: finalQuery,
+        query,
         previousConversation: conversationHistory,
         concept: currentConcept,
         followUpMode: 'expansive'
